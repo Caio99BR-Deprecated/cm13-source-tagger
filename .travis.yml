@@ -1,0 +1,31 @@
+sudo: required
+language: c
+before_script:
+- mkdir ~/bin
+- PATH=~/bin:$PATH
+- curl http://commondatastorage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+- chmod a+x ~/bin/repo
+- git config --global user.name "Travis-CI" &> /dev/null
+- git config --global user.email "builds@travis-ci.com" &> /dev/null
+- repo init -u https://github.com/CyanogenMod/android.git -b cm-13.0 <<< y
+- repo sync
+- rm -rf .repo/
+script:
+- export CURRENT_DIR=$(pwd)
+- cd ../
+- export CURRENT_DATE=$(date +"%d%m%y-%Hh%Mm%Ss")
+- zip -r cm-13.0-${CURRENT_DATE}.zip ${CURRENT_DIR}/
+before_deploy:
+- export GIT_TAG=$TRAVIS_BRANCH.$TRAVIS_BUILD_NUMBER
+- git tag $GIT_TAG -a -m "Generated tag from TravisCI for build $TRAVIS_BUILD_NUMBER"
+- git push -q https://$TAGPERM@github.com/TeamVee-Deprecated/cm13-source-tagger --tags
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    secure: mjT+MB69KtwJTaCtgzlHbrxEryE8MvXjfyOi1vcyI/7IY3SB5e7dneMfwYepGeydR0Iwowveq4rR6BXW/Aw2NTgjs27Q0cU5FBTjhHE4gY6KEbib6I73LcuxWU52wzJbWLYGQMhxSEwolzrLTrTQc5SJvY5/vDJdWq2P6CerIXfXHZa4SmsMniPRhv0h+mXbcu4V+dAo/a7dXg13dRas3YVlcOiBe5ezKeFUbMh6l9npYjj0g5GckPdoH7FNRnxNrmL7wXiz49KsKFDg/orAtx/yg03C0fOLHpM3yyMZleNWX6eV8FBYQmbMGfjvc1wCJbd8vdS1YgmIWfYW1Oz12Yg59dcrMvqSf2Ft3ZSU3dXe1JnmYEj2BvRCGMIwyPguKqdH8gL2QmqQ1g8FMkHqYlk7oImUA18NsAvjvDobuVwBfHV3kkmY+ocv4EKfKRUwq5y5y3q6o0v+v5o28Ze/8JBMmqO3boF6jPkq72OyzSkZGy+Fsu9BkOalcoNHb38n7MZLjRW9mlNfr1EEzPzocaoQ/mQE3a0bxNVcmxYhF4v9w27DzHmk+dHU0jY+3Hm2RqS4p3+sNkHbl+9Yh95QAAOhZ20KY1r2ehQEnq0IW6SKMoe/v8DK+uKXyTmUxvi/kX/v/TdpsZ453vXL54RWoOTn2GwZJlPhPk/7YwxWpaA=
+  file:
+    - "cm-13.0-${CURRENT_DATE}.zip"
+  on:
+    tags: false
+    all_branches: true
