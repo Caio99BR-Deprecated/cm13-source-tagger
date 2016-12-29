@@ -18,7 +18,7 @@ script:
 before_deploy:
 - export GIT_TAG=$TRAVIS_BRANCH.$TRAVIS_BUILD_NUMBER
 - git tag $GIT_TAG -a -m "Generated tag from TravisCI for build $TRAVIS_BUILD_NUMBER"
-- git push -q https://$TAGPERM@github.com/TeamVee-Deprecated/cm13-source-tagger --tags
+- git push -q https://$TAGPERM@github.com/$TRAVIS_REPO_SLUG -f --tags
 deploy:
   skip_cleanup: true
   provider: releases
